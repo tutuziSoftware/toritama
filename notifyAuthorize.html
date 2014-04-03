@@ -1,0 +1,23 @@
+<html>
+	<head>
+		<meta charset="UTF-8" />
+		<script src="jquery-1.7.1.min.js"></script>
+		<script>
+			$(function(){
+				$("#message").click(function(){
+					var noti = window.webkitNotifications;
+					
+					console.log("test");
+					noti.requestPermission(function(){
+						if(noti.checkPermission() == 0){
+							location.href = "popup.html";
+						}
+					});
+				});
+			});
+		</script>
+	</head>
+	<body>
+		<button id="message">通知を承認してください。</button>
+	</body>
+</html>

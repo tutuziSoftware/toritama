@@ -1,0 +1,176 @@
+<html>
+	<head>
+		<meta charset="UTF-8" />
+		<script src="jquery-1.7.1.min.js"></script>
+		<script src="gluten.js"></script>
+		<script>
+			var shower = {};
+			
+			shower.notify = function(title, body){
+				var noti = window.webkitNotifications;
+				
+				noti.requestPermission(function(){
+					if(noti.checkPermission() == 0){
+						noti.createNotification("Anarchy-symbol.png", title, body).show();
+					}
+				});
+			};
+			
+			shower.history = new function(){
+				var that = {};
+				
+				var _historys = [];
+				
+				that.add = function(history){
+					_historys.push(history);
+				};
+				
+				that.removeAll = function(){
+					_historys = [];
+					
+					$("#historys").empty();
+				};
+				
+				that.show = function(){
+					_historys.forEach(function(history, i){
+						$("#historys").append(
+							$("<li id='history" + i + "'/>").append(
+								$("<button class='restoreHistory'/>").text(
+									history)).append(
+								$("<button class='deleteHistory'/>").text(
+									"☑")))
+					});
+				};
+				
+				that.addRestoreClickListener = function(listener){
+					$(".restoreHistory").live("click", function(e){
+						listener(e, $(this));
+					});
+				};
+				
+				that.addDeleteClickListener = function(listener){
+					$(".deleteHistory").live("click", function(e){
+						listener(e, $(this));
+					});
+				};
+				
+				return that;
+			};
+			
+			
+			
+			var model = {};
+			
+			model.history = new function(){
+				var that = {};
+				
+				gluten.localStorage("historys").create([]);
+				
+				var _historys = gluten.localStorage("historys");
+				
+				that.add = function(history){
+					var historys = _historys.get();
+					
+					historys.unshift(history);
+					
+					if(historys.length >= 21){
+						historys.pop();
+					}
+					
+					_historys.set(historys);
+					
+					console.log("add history");
+				};
+				
+				that.remove = function(index){
+					var historys = _historys.get();
+					
+					historys.splice(index, 1);
+					
+					_historys.set(historys);
+					
+					console.log("remove history");
+				};
+				
+				that.get = function(index){
+					return gluten.localStorage("historys").get()[index];
+				};
+				
+				that.gets = function(){
+					return gluten.localStorage("historys").get();
+				};
+				
+				return that;
+			};
+			
+			
+			//初回起動時
+			$(function(){
+				if(window.webkitNotifications.checkPermission() != 0){
+					window.open("notifyAuthorize.html");
+					return;
+				}
+			});
+			
+			$(function(){
+				//ポップアップ時
+				showHistory();
+				
+				new function(){
+					$("#body").keydown(function(e){
+						if(e.keyCode == 229) return;
+						if(e.keyCode != 13) return
+						
+						model.history.add($("#body").val());
+						shower.notify("", $("#body").val());
+						showHistory();
+					});
+				};
+				
+				
+				
+				//イベントリスナー
+				shower.history.addRestoreClickListener(function(_, element){
+					var number = element.parent().attr("id").match(/^history([0-9]d*)$/)[1];
+					var history = model.history.get(number);
+					
+					model.history.remove(number);
+					model.history.add(history);
+					shower.notify("", model.history.get(number));
+					showHistory();
+					
+					console.log("restoreHistory!");
+				});
+				
+				shower.history.addDeleteClickListener(function(_, element){
+					var number = element.parent().attr("id").match(/^history([0-9]d*)$/)[1];
+					
+					model.history.remove(number);
+					
+					showHistory();
+					
+					console.log("deleteHistory!");
+				});
+				
+				
+				
+				
+				
+				function showHistory(){
+					shower.history.removeAll();
+					
+					model.history.gets().forEach(function(history){
+						shower.history.add(history);
+					});
+					
+					shower.history.show();
+				};
+			});
+		</script>
+		<link rel="stylesheet" href="history.css" />
+	</head>
+	<body>
+		<input type="text" id="body" />
+		<ul id="historys" />
+	</body>
+</html>

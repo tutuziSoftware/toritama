@@ -1,0 +1,16 @@
+{
+  "name":"とりたま",
+  "version":"1.0.0.1",//互換性.機能追加数.変更数.バグフィクス数
+  "description":"鳥頭専用見出し",
+  "permissions": [],
+  "background_page":"background.html",
+  "browser_action": {
+    "default_icon": "Anarchy-symbol.png",
+    "default_title": "とりたま",
+	"popup":"popup.html"
+  },
+  "icons":{
+    "16":"Anarchy-symbol.png",
+    "48":"Anarchy-symbol.png"
+  }
+}
